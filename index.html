@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flockd — Social media for real friendship</title>
+<style>
+:root{
+  --bg:#f5f7fb;--panel:#fff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
+  --blue:#2563eb;--indigo:#4f46e5;--violet:#7c3aed;--green:#16a34a;--amber:#d97706;--rose:#e11d48;
+  --shadow:0 22px 55px rgba(15,23,42,.09);--r:24px;--side:296px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+h1{font-size:34px;letter-spacing:-.035em}h2{font-size:22px;letter-spacing:-.025em}h3{font-size:18px}.sub{color:var(--muted);line-height:1.5}
+.app{display:grid;grid-template-columns:var(--side) 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;background:#fff;border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 8px 18px;border-bottom:1px solid var(--line)}
+.logo{width:48px;height:48px;border-radius:17px;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;color:#fff;font-weight:950;box-shadow:0 14px 30px rgba(37,99,235,.22)}
+.brand strong{display:block;font-size:21px}.brand span{display:block;color:var(--muted);font-size:12px}
+.nav{display:grid;gap:6px}.nav a{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:15px;color:#334155;font-weight:780;text-decoration:none}.nav a.active,.nav a:hover{background:#eef4ff;color:#1d4ed8}
+.nav-title{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#94a3b8;padding:8px 10px 2px}
+.side-card{margin-top:auto;background:linear-gradient(180deg,#f8fbff,#fff);border:1px solid var(--line);border-radius:22px;padding:16px}.side-card p{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
+.main{min-width:0}.topbar{height:78px;position:sticky;top:0;z-index:5;background:rgba(245,247,251,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,.95);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px}
+.search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:11px 15px;flex:1;max-width:580px}.search input{border:0;outline:0;background:transparent;width:100%}
+.top-actions{display:flex;align-items:center;gap:10px}.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#fff);display:grid;place-items:center;color:#1d4ed8;font-weight:900;border:1px solid #dbe7ff}
+.content{padding:24px}.screen{display:none}.screen.active{display:block}.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px}
+.grid{display:grid;gap:16px}.two{grid-template-columns:1.08fr .92fr}.three{grid-template-columns:repeat(3,1fr)}.four{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.hero{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}.hero-box{background:radial-gradient(circle at top right,rgba(124,58,237,.12),transparent 32%),linear-gradient(135deg,#eef4ff,#fff);border:1px solid #dbe7ff;border-radius:30px;padding:30px;box-shadow:var(--shadow)}.hero h1{font-size:48px;line-height:1.02}
+.btn{border:0;border-radius:14px;padding:12px 15px;font-weight:880;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn.primary{background:var(--blue);color:#fff;box-shadow:0 10px 22px rgba(37,99,235,.18)}.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn.ghost{background:#f8fafc;color:#334155;border:1px solid var(--line)}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:#eef4ff;color:#1d4ed8;border:1px solid #dbe7ff;font-size:12px;font-weight:850}.pill.green{background:#ecfdf3;color:#15803d;border-color:#ccefd9}.pill.amber{background:#fffbeb;color:#a16207;border-color:#fde7b0}.pill.rose{background:#fff1f2;color:#be123c;border-color:#fecdd3}.pill.violet{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.pill.gray{background:#f8fafc;color:#475569;border-color:#e2e8f0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 10px 26px rgba(15,23,42,.05)}.kpi span{color:var(--muted);font-size:13px}.kpi strong{display:block;font-size:28px;margin-top:6px}
+.feed,.list{display:grid;gap:12px}.post{background:#fff;border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow)}.post-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.user{display:flex;align-items:center;gap:12px}.userpic{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#fff);border:1px solid #dbe7ff;display:grid;place-items:center;color:#1d4ed8;font-weight:900}.post p{color:#334155;line-height:1.55;margin-top:12px}.post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.comment{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:11px;margin-top:10px;color:#475569;font-size:14px}
+.item{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:18px;background:#fff}.feed-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;flex:none;background:#eff6ff;color:#2563eb}.greenicon{background:#ecfdf3;color:#16a34a}.violeticon{background:#f5f3ff;color:#7c3aed}.roseicon{background:#fff1f2;color:#e11d48}.ambericon{background:#fffbeb;color:#d97706}
+.form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:13px;font-weight:850;color:#334155}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;outline:none}.field textarea{min-height:100px;resize:vertical}
+.profile-card{display:grid;grid-template-columns:84px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:20px;background:#fff;padding:14px}.meter{height:10px;border-radius:999px;background:#eef2f7;overflow:hidden;margin-top:12px}.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:999px}
+.circle-grid,.memory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.circle-card,.memory-card,.rule{border:1px solid var(--line);border-radius:20px;background:#fff;padding:16px}.memory-card{background:linear-gradient(180deg,#fff,#fafcff)}
+.stage{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:12px;border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}.stage-num{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#eef4ff;color:#1d4ed8;font-weight:900}
+.notification{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px}
+.toast{position:fixed;right:20px;bottom:20px;background:#0f172a;color:#fff;border-radius:16px;padding:13px 16px;display:none;z-index:99}.toast.show{display:block}.mobilebar{display:none}
+@media(max-width:1180px){.app{grid-template-columns:1fr}.sidebar{display:none}.mobilebar{display:flex}.hero,.two,.three,.four,.circle-grid,.memory-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.content{padding:16px 14px 82px}.profile-card,.stage,.notification{grid-template-columns:1fr}.topbar{padding:0 14px}}
+@media(max-width:640px){.topbar{height:auto;padding:12px;flex-direction:column;align-items:stretch}.kpis{grid-template-columns:1fr}.hero h1{font-size:34px}.btn{width:100%}}
+.mobilebar{position:fixed;left:0;right:0;bottom:0;background:#fff;z-index:20;border-top:1px solid var(--line);justify-content:space-around;padding:8px 4px}.mobilebar a{color:#475569;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:750;text-decoration:none}
+</style>
+</head>
+<body>
+<div id="toast" class="toast">Saved</div>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">F</div><div><strong>Flockd</strong><span>Social media for real friendship</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">Friendship social</div>
+    <a class="active" onclick="showScreen('home',this)">🏠 Home</a>
+    <a onclick="showScreen('feed',this)">📰 Feed</a>
+    <a onclick="showScreen('post',this)">✍️ Post</a>
+    <a onclick="showScreen('profile',this)">🙂 Profiles</a>
+    <a onclick="showScreen('circles',this)">👥 Circles</a>
+    <a onclick="showScreen('engine',this)">🤝 Friend Engine</a>
+    <a onclick="showScreen('memories',this)">📸 Memories</a>
+    <a onclick="showScreen('notifications',this)">🔔 Notifications</a>
+    <a onclick="showScreen('safety',this)">🛡️ Safety</a>
+  </nav>
+  <div class="side-card">
+    <strong>What social media should have been.</strong>
+    <p>Post, comment, laugh, remember, and gradually turn strangers into actual friends.</p>
+    <button class="btn primary" onclick="showScreen('post')">Create post</button>
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="search"><span>🔎</span><input placeholder="Search people, circles, posts, memories..." /></div>
+  <div class="top-actions"><span class="pill green">Friendship-first</span><button class="btn secondary" onclick="showScreen('post')">Post</button><div class="avatar">FR</div></div>
+</header>
+
+<div class="content">
+<section id="screen-home" class="screen active">
+  <div class="page-head">
+    <div><h1>Flockd</h1><p class="sub">A social network where profiles, posts, likes and comments are designed to create actual friendships and memories.</p></div>
+    <button class="btn primary" onclick="showScreen('post')">+ New post</button>
+  </div>
+  <div class="hero">
+    <div class="hero-box">
+      <span class="pill rose">Social media rebuilt</span>
+      <h1 style="margin-top:12px">Not followers. Friends. Not content. Memories.</h1>
+      <p class="sub" style="font-size:16px;margin-top:12px">Flockd keeps what people love about social media — profiles, posting, likes, comments, photos and identity — but changes the reward system so strangers become familiar, familiar becomes friendship, and friendships turn into memories.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn primary" onclick="showScreen('feed')">Open feed</button>
+        <button class="btn secondary" onclick="showScreen('engine')">See friend engine</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Today’s social pulse</h2>
+      <div id="pulseList" class="list" style="margin-top:14px"></div>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><span>Active circles</span><strong id="kpiCircles">0</strong></div>
+    <div class="kpi"><span>Friendships forming</span><strong id="kpiFriends">0</strong></div>
+    <div class="kpi"><span>Memories created</span><strong id="kpiMemories">0</strong></div>
+    <div class="kpi"><span>DMs unlocked</span><strong id="kpiUnlocked">0</strong></div>
+  </div>
+  <div class="grid two">
+    <div class="card"><h2>Posts pulling people together</h2><div id="homePosts" class="feed" style="margin-top:14px"></div></div>
+    <div class="card">
+      <h2>The friendship loop</h2>
+      <div class="list" style="margin-top:14px">
+        <div class="stage"><div class="stage-num">1</div><div><strong>Post your real life</strong><p class="sub">Thoughts, jokes, photos, voice-style updates, questions, moments.</p></div><span class="pill gray">Identity</span></div>
+        <div class="stage"><div class="stage-num">2</div><div><strong>Find circles where you click</strong><p class="sub">People gather around interests and vibe, not follower counts.</p></div><span class="pill gray">Belonging</span></div>
+        <div class="stage"><div class="stage-num">3</div><div><strong>Friend engine spots chemistry</strong><p class="sub">Repeated comments, replies and shared circles unlock deeper connection.</p></div><span class="pill green">Friends</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="screen-feed" class="screen">
+  <div class="page-head"><div><h1>Feed</h1><p class="sub">A proper social feed, but ranked for conversation and connection — not just vanity.</p></div><span class="pill violet">Conversation-weighted</span></div>
+  <div id="feedPosts" class="feed"></div>
+</section>
+
+<section id="screen-post" class="screen">
+  <div class="page-head"><div><h1>Create post</h1><p class="sub">Posts are the doorway into friendship: people show personality, others reply, circles form.</p></div></div>
+  <div class="grid two">
+    <div class="card">
+      <h2>New post</h2>
+      <form class="form" style="margin-top:14px">
+        <div class="field"><label>Post type</label><select id="postType"><option>Thought / update</option><option>Question</option><option>Photo memory</option><option>Voice-note style</option><option>Hot take</option><option>Recommendation</option></select></div>
+        <div class="field"><label>What are you posting?</label><textarea id="postText" placeholder="Does anyone else feel like social media made everyone visible but harder to actually know?"></textarea></div>
+        <div class="field"><label>Circle / topic</label><input id="postCircle" placeholder="Deep Chats / Football / Films / Gym / Life Lately" /></div>
+        <button type="button" class="btn primary" onclick="addPost()">Post to Flockd</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Post formats built for friendship</h2>
+      <div class="list" style="margin-top:14px">
+        <div class="rule"><strong>Questions</strong><p class="sub">Designed to start comment threads, not just collect likes.</p></div>
+        <div class="rule"><strong>Voice-style posts</strong><p class="sub">More personality, less polished influencer energy.</p></div>
+        <div class="rule"><strong>Memory posts</strong><p class="sub">Turn online interaction into saved shared moments.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="screen-profile" class="screen">
+  <div class="page-head"><div><h1>Profiles</h1><p class="sub">A social identity page people actually want to build — but designed around friends, not clout.</p></div></div>
+  <div class="grid two">
+    <div class="card">
+      <div class="profile-card">
+        <div class="userpic">FR</div>
+        <div><h2>Fraser</h2><p class="sub">Penrith · business ideas, football, gym, films, actual conversation</p></div>
+        <span class="pill green">6 circles</span>
+      </div>
+      <div class="list" style="margin-top:14px">
+        <div class="item"><div class="feed-icon">📌</div><div><strong>Pinned vibe</strong><p class="sub">Building things, likes funny people, wants a proper social life again.</p></div></div>
+        <div class="item"><div class="feed-icon violeticon">🤝</div><div><strong>Friendship stats</strong><p class="sub">3 strong mutuals forming · 2 private circles unlocked this month.</p></div></div>
+        <div class="item"><div class="feed-icon greenicon">💬</div><div><strong>Top circles</strong><p class="sub">Football Banter, Big Ideas, Film & Late-Night Opinions.</p></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Profile sections</h2>
+      <div class="list" style="margin-top:14px">
+        <div class="rule"><strong>Posts</strong><p class="sub">Normal social posts, questions, photos, thoughts and voice-style updates.</p></div>
+        <div class="rule"><strong>About</strong><p class="sub">Interests, prompts, humour, values, what you actually like talking about.</p></div>
+        <div class="rule"><strong>Circles</strong><p class="sub">The spaces you’re known in.</p></div>
+        <div class="rule"><strong>Memories</strong><p class="sub">Shared moments, best comments, circle highlights, group photos later.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="screen-circles" class="screen">
+  <div class="page-head"><div><h1>Circles</h1><p class="sub">Small social spaces where strangers become familiar and familiar becomes friendship.</p></div><button class="btn primary" onclick="addCircle()">+ Create circle</button></div>
+  <div class="grid two">
+    <div class="card">
+      <h2>Create circle</h2>
+      <form class="form" style="margin-top:14px">
+        <div class="field"><label>Name</label><input id="circleName" placeholder="Big Ideas, No Small Talk" /></div>
+        <div class="field"><label>Vibe</label><input id="circleVibe" placeholder="Startups, wild ideas, honest opinions, no judgement" /></div>
+        <div class="field"><label>Privacy</label><select id="circlePrivacy"><option>Open circle</option><option>Request to join</option><option>Private after invite</option></select></div>
+      </form>
+    </div>
+    <div id="circleList" class="circle-grid"></div>
+  </div>
+</section>
+
+<section id="screen-engine" class="screen">
+  <div class="page-head"><div><h1>Friend Engine</h1><p class="sub">The unique layer: Flockd measures rapport, not just reach.</p></div><span class="pill rose">The secret sauce</span></div>
+  <div id="friendList" class="list"></div>
+  <div class="card" style="margin-top:16px">
+    <h2>How connection progresses</h2>
+    <div class="list" style="margin-top:14px">
+      <div class="stage"><div class="stage-num">1</div><div><strong>Discover</strong><p class="sub">You see people through posts and circles, not awkward swipes.</p></div><span class="pill gray">Public</span></div>
+      <div class="stage"><div class="stage-num">2</div><div><strong>Interact</strong><p class="sub">Likes, comments, replies, prompts and circle conversations build familiarity.</p></div><span class="pill amber">Warm</span></div>
+      <div class="stage"><div class="stage-num">3</div><div><strong>Unlock</strong><p class="sub">DMs, private circles, calls or group hangs unlock after repeated interaction.</p></div><span class="pill green">Friend</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="screen-memories" class="screen">
+  <div class="page-head"><div><h1>Memories</h1><p class="sub">Social media should not just scroll past your life — it should help you remember who you shared it with.</p></div><button class="btn primary" onclick="addMemory()">+ Add memory</button></div>
+  <div class="grid two">
+    <div class="card">
+      <h2>Create memory</h2>
+      <form class="form" style="margin-top:14px">
+        <div class="field"><label>Memory title</label><input id="memoryTitle" placeholder="First Flockd football meet-up" /></div>
+        <div class="field"><label>What happened?</label><textarea id="memoryText" placeholder="Seven of us turned up, two were terrible, everyone laughed, and we’re doing it again next week."></textarea></div>
+      </form>
+    </div>
+    <div id="memoryList" class="memory-grid"></div>
+  </div>
+</section>
+
+<section id="screen-notifications" class="screen">
+  <div class="page-head"><div><h1>Notifications</h1><p class="sub">The right nudges make people return without turning the app into doomscrolling.</p></div></div>
+  <div id="notificationList" class="list"></div>
+</section>
+
+<section id="screen-safety" class="screen">
+  <div class="page-head"><div><h1>Safety & culture</h1><p class="sub">To make friends with strangers, the product has to prevent creepiness, harassment and dating-app drift.</p></div></div>
+  <div class="grid three">
+    <div class="card"><div class="feed-icon roseicon">🔒</div><h2 style="margin-top:12px">DMs unlock later</h2><p class="sub" style="margin-top:8px">No instant stranger inboxing. Public or circle interaction comes first.</p></div>
+    <div class="card"><div class="feed-icon greenicon">👥</div><h2 style="margin-top:12px">Circles before cold chats</h2><p class="sub" style="margin-top:8px">The safest route to friendship is group familiarity before one-to-one access.</p></div>
+    <div class="card"><div class="feed-icon violeticon">🧭</div><h2 style="margin-top:12px">Culture by design</h2><p class="sub" style="margin-top:8px">Rank comments, kindness, repeated interaction and circle health above thirst or clout.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Non-negotiable product rules</h2>
+    <div class="list" style="margin-top:14px">
+      <div class="rule"><strong>No follower-count obsession</strong><p class="sub">Visibility matters, but friendships and circles are the real status layer.</p></div>
+      <div class="rule"><strong>Anti-dating drift</strong><p class="sub">DM limits, circle-first discovery, relationship intent filters, and behaviour moderation.</p></div>
+      <div class="rule"><strong>Trust signals</strong><p class="sub">Phone verification, report/block, account age, comment limits and stronger controls for vulnerable users.</p></div>
+      <div class="rule"><strong>Memories over endless scrolling</strong><p class="sub">The product rewards people for building moments with others, not just consuming content forever.</p></div>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+</div>
+
+<nav class="mobilebar">
+  <a onclick="showScreen('home')">🏠<span>Home</span></a>
+  <a onclick="showScreen('feed')">📰<span>Feed</span></a>
+  <a onclick="showScreen('post')">✍️<span>Post</span></a>
+  <a onclick="showScreen('engine')">🤝<span>Friends</span></a>
+  <a onclick="showScreen('memories')">📸<span>Memories</span></a>
+</nav>
+
+<script>
+const defaultState = {
+  posts: [
+    {id:1,user:'Maya',initials:'MA',circle:'Film & Late-Night Opinions',type:'Question',text:'Why do I always end up rewatching old sitcoms instead of starting new shows? Need something actually addictive.',likes:18,comments:['Severance if you want something different.','I’m the same with Peep Show.']},
+    {id:2,user:'Tom',initials:'TO',circle:'Remote Work & Real Life',type:'Thought',text:'Working from home is great until you realise you’ve spoken to no one all day. Anyone else forcing themselves out for coffee just to feel human?',likes:26,comments:['Yes. I basically work from cafés twice a week for this exact reason.']},
+    {id:3,user:'Sam',initials:'SA',circle:'Football Banter',type:'Plan',text:'Need a proper 5-a-side group where people actually turn up every week. Who’s in?',likes:12,comments:['I’d be up for it if enough people are keen.','Put me down.']}
+  ],
+  circles: [
+    {name:'Film & Late-Night Opinions', vibe:'TV, films, takes, recommendations, memes', privacy:'Open circle', members:18},
+    {name:'Remote Work & Real Life', vibe:'WFH, routines, getting out the house', privacy:'Request to join', members:23},
+    {name:'Football Banter', vibe:'5-a-side, watching football, pub chat, fantasy leagues', privacy:'Open circle', members:31}
+  ],
+  friends: [
+    {name:'Maya',initials:'MA',score:82,detail:'You’ve commented on each other’s posts 11 times and share 2 circles.',status:'Start private circle'},
+    {name:'Tom',initials:'TO',score:67,detail:'You’re active in the same work/life circle and reply to each other every week.',status:'Keep interacting'},
+    {name:'Sam',initials:'SA',score:74,detail:'Shared football circle + repeated replies + 3 mutuals.',status:'DM unlocked'}
+  ],
+  memories:[
+    {title:'First Flockd football meet-up',text:'Seven people from the football circle turned up. Everyone was terrible. Everyone wants to do it again.'},
+    {title:'Café work crew became real',text:'The remote work circle met at the same café and now has a Friday routine.'},
+    {title:'Film circle watch night',text:'A random post turned into six people watching the same film and arguing about the ending.'}
+  ],
+  notifications:[
+    {icon:'🤝',title:'Friendship forming',text:'You and Maya have built 82% friendship chemistry.'},
+    {icon:'💬',title:'Circle active',text:'Football Banter has 9 new comments today.'},
+    {icon:'📸',title:'Memory saved',text:'Your first football meet-up was added to Memories.'},
+    {icon:'🔓',title:'DM unlocked',text:'You and Sam can now message after repeated circle interaction.'}
+  ]
+};
+let state = JSON.parse(localStorage.getItem('flockd_startup_state') || 'null') || defaultState;
+function save(){ localStorage.setItem('flockd_startup_state', JSON.stringify(state)); }
+function toast(msg='Saved'){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+function showScreen(name,nav){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); const el=document.getElementById('screen-'+name); if(el) el.classList.add('active'); document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active')); if(nav) nav.classList.add('active'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function postHTML(p){return `<div class="post"><div class="post-head"><div class="user"><div class="userpic">${p.initials}</div><div><strong>${p.user}</strong><p class="sub">${p.circle} · ${p.type}</p></div></div><span class="pill gray">${p.likes} likes</span></div><p>${p.text}</p><div class="post-actions"><button class="btn ghost" onclick="likePost(${p.id})">Like</button><button class="btn secondary" onclick="commentPost(${p.id})">Comment</button><button class="btn ghost" onclick="saveMemoryFromPost(${p.id})">Save memory</button><span class="pill amber">Friendship-weighted</span></div>${p.comments.map(c=>`<div class="comment">${c}</div>`).join('')}</div>`}
+function renderPosts(){document.getElementById('feedPosts').innerHTML=state.posts.map(postHTML).join('');document.getElementById('homePosts').innerHTML=state.posts.slice(0,2).map(postHTML).join('');document.getElementById('pulseList').innerHTML=state.notifications.slice(0,4).map(n=>`<div class="item"><div class="feed-icon">${n.icon}</div><div><strong>${n.title}</strong><p>${n.text}</p></div></div>`).join('');}
+function addPost(){const text=document.getElementById('postText').value.trim();if(!text){toast('Write something first');return;}const type=document.getElementById('postType').value;const circle=document.getElementById('postCircle').value||'General';state.posts.unshift({id:Date.now(),user:'Fraser',initials:'FR',circle,type,text,likes:0,comments:[]});state.notifications.unshift({icon:'✍️',title:'Post created',text:'Your post is now live in '+circle+'.'});save();renderAll();toast('Posted to Flockd');showScreen('feed');}
+function likePost(id){const p=state.posts.find(x=>x.id===id);if(p){p.likes++;save();renderAll();toast('Liked');}}
+function commentPost(id){const p=state.posts.find(x=>x.id===id);if(!p)return;const c=prompt('Add a comment:');if(c){p.comments.push(c);save();renderAll();toast('Comment added');}}
+function saveMemoryFromPost(id){const p=state.posts.find(x=>x.id===id);if(!p)return;state.memories.unshift({title:'Memory from '+p.circle,text:p.text});state.notifications.unshift({icon:'📸',title:'Memory saved',text:'A post was saved into Memories.'});save();renderAll();toast('Saved as memory');}
+function renderCircles(){document.getElementById('circleList').innerHTML=state.circles.map(c=>`<div class="circle-card"><span class="pill">${c.privacy}</span><h2 style="margin-top:10px">${c.name}</h2><p class="sub">${c.vibe}</p><p class="sub" style="margin-top:10px">${c.members} members</p><button class="btn secondary" style="margin-top:12px">Open circle</button></div>`).join('');}
+function addCircle(){const name=document.getElementById('circleName').value.trim();if(!name){toast('Add a circle name');return;}state.circles.unshift({name,vibe:document.getElementById('circleVibe').value||'New circle',privacy:document.getElementById('circlePrivacy').value,members:1});state.notifications.unshift({icon:'👥',title:'Circle created',text:name+' is ready for people.'});save();renderAll();toast('Circle created');}
+function renderFriends(){document.getElementById('friendList').innerHTML=state.friends.map(f=>`<div class="profile-card"><div class="userpic">${f.initials}</div><div><h2>${f.name}</h2><p class="sub">${f.detail}</p><div class="meter"><span style="width:${f.score}%"></span></div><p class="sub">${f.score}% friendship chemistry</p></div><span class="pill ${f.status==='DM unlocked'?'green':'rose'}">${f.status}</span></div>`).join('');}
+function renderMemories(){document.getElementById('memoryList').innerHTML=state.memories.map(m=>`<div class="memory-card"><span class="pill violet">Memory</span><h2 style="margin-top:10px">${m.title}</h2><p class="sub" style="margin-top:8px">${m.text}</p></div>`).join('');}
+function addMemory(){const title=document.getElementById('memoryTitle').value.trim();if(!title){toast('Add a memory title');return;}state.memories.unshift({title,text:document.getElementById('memoryText').value||'A moment worth keeping.'});state.notifications.unshift({icon:'📸',title:'Memory created',text:title});save();renderAll();toast('Memory added');}
+function renderNotifications(){document.getElementById('notificationList').innerHTML=state.notifications.map(n=>`<div class="notification"><div class="feed-icon">${n.icon}</div><div><strong>${n.title}</strong><p class="sub">${n.text}</p></div><span class="pill gray">Now</span></div>`).join('');}
+function renderKpis(){document.getElementById('kpiCircles').textContent=state.circles.length;document.getElementById('kpiFriends').textContent=state.friends.length;document.getElementById('kpiMemories').textContent=state.memories.length;document.getElementById('kpiUnlocked').textContent=state.friends.filter(f=>f.status==='DM unlocked').length;}
+function renderAll(){renderPosts();renderCircles();renderFriends();renderMemories();renderNotifications();renderKpis();}
+document.addEventListener('DOMContentLoaded',renderAll);
+</script>
+</body>
+</html>
